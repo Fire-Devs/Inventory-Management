@@ -1,16 +1,19 @@
 package main
 
 import (
-	"fmt"
+	"github.com/gofiber/fiber/v3"
+	"log"
 )
 
 func main() {
+	app := fiber.New()
 
-	s := "gopher"
-	fmt.Printf("Hello and welcome, %s!\n", s)
+	app.Get("/", func(c fiber.Ctx) error {
+		return c.SendString("Hello, World!")
+	})
 
-	for i := 1; i <= 5; i++ {
-
-		fmt.Println("i =", 100/i)
+	err := app.Listen(":8080")
+	if err != nil {
+		log.Fatal(err)
 	}
 }
