@@ -1,0 +1,12 @@
+[database]
+    host = "localhost"
+    port = 5432
+    user = "root"
+    pass= "root"
+    dbname = "postgres"
+
+[server]
+    port = ":8080"
+
+[jwt]
+    secret = "secret"
