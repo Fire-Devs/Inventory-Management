@@ -25,7 +25,7 @@ func Login(c fiber.Ctx) error {
 		})
 	}
 
-	name, email, password, err := repository.GetUserByEmailOrName(user.Name)
+	name, email, password, err := repository.GetUserByEmailOrName(user.Email)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"error": err.Error(),
@@ -73,17 +73,10 @@ func Register(c fiber.Ctx) error {
 			"error": err.Error(),
 		})
 	}
-	token := jwt.New(jwt.SigningMethodHS256)
-
-	claims := token.Claims.(jwt.MapClaims)
-	claims["name"] = user.Name
-	claims["email"] = user.Email
-	claims["exp"] = time.Now().Add(time.Hour * 48).Unix()
-
-	t, err := token.SignedString([]byte(conf.Jwt.Secret))
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{
-			"error": err.Error(),
+	name, email, _, _ := repository.GetUserByEmailOrName(user.Email)
+	if email != "" && name != "" {
+		return c.Status(400).JSON(fiber.Map{
+			"error": "User already exists",
 		})
 	}
 
@@ -101,16 +94,39 @@ func Register(c fiber.Ctx) error {
 		})
 	}
 
-	c.Cookie(&fiber.Cookie{
-		Name:     "token",
-		Value:    t,
-		MaxAge:   60 * 60 * 48,
-		Secure:   false,
-		HTTPOnly: true,
-	})
+	randomtoken := utils.GenerateARandomString(10)
+	err = repository.SetUserToken(randomtoken, user.Email)
 
 	return c.JSON(fiber.Map{
 		"success": "Cookie set",
+	})
+
+}
+
+func VerifyToken(c fiber.Ctx) error {
+	token := c.Query("token")
+	if token == "" {
+		return c.Status(400).JSON(fiber.Map{
+			"error": "Token not found",
+		})
+
+	}
+	_, err := repository.GetUserToken(token)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": "Token Invalid or Expired",
+		})
+	}
+
+	err2 := repository.Verifyuser(token)
+	if err2 != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": err2.Error(),
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"status": "User verified",
 	})
 
 }

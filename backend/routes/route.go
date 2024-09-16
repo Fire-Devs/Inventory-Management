@@ -11,4 +11,5 @@ func HandleRoutes(app *fiber.App) {
 
 	auth.Post("/login", handler.Login)
 	auth.Post("/register", handler.Register)
+	auth.Get("/verify", handler.VerifyToken)
 }

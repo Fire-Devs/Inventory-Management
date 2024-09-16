@@ -2,6 +2,7 @@ package utils
 
 import (
 	"golang.org/x/crypto/bcrypt"
+	"math/rand"
 )
 
 func HashPassword(password string) (string, error) {
@@ -18,4 +19,13 @@ func CheckPassword(hashedPassword string, password string) error {
 		return err
 	}
 	return nil
+}
+
+func GenerateARandomString(length int) string {
+	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = charset[rand.Intn(len(charset))]
+	}
+	return string(b)
 }

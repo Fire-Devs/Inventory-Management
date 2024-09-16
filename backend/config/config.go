@@ -12,6 +12,12 @@ type Database struct {
 	DbPass string `toml:"pass"`
 	DbName string `toml:"dbname"`
 }
+
+type Redis struct {
+	Host string `toml:"host"`
+	Port int64  `toml:"port"`
+}
+
 type Jwt struct {
 	Secret string `toml:"secret"`
 }
@@ -22,6 +28,7 @@ type Server struct {
 
 type Config struct {
 	Database Database `toml:"database"`
+	Redis    Redis    `toml:"redis"`
 	Jwt      Jwt      `toml:"jwt"`
 	Server   Server   `toml:"server"`
 }
