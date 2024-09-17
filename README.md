@@ -53,7 +53,6 @@ To set up this project locally, follow the steps below:
       ```bash
       docker-compose up -d
       ```
-      ```
       ```bash
       air
       ```
