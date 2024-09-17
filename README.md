@@ -51,6 +51,10 @@ To set up this project locally, follow the steps below:
       go mod tidy
       ```
       ```bash
+      docker-compose up -d
+      ```
+      ```
+      ```bash
       air
       ```
 
