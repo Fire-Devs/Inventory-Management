@@ -14,7 +14,7 @@ func SendEmail(url string, email string) error {
 		From:    "noreply<onboarding@resend.dev>",
 		To:      []string{email},
 		Subject: "Confirm your mail",
-		Html:    fmt.Sprintf("<a href='%s'>Click here to confirm your email</a>", url),
+		Html:    fmt.Sprintf("Please click this click to verify your account <a href='%s'>Click Here</a>", url),
 	}
 
 	_, err := client.Emails.SendWithContext(ctx, params)
