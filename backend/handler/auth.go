@@ -66,6 +66,27 @@ func Login(c fiber.Ctx) error {
 
 }
 
+func ParseJWT(cookie string) error {
+
+	token, err := jwt.Parse(cookie, func(token *jwt.Token) (interface{}, error) {
+		return []byte(conf.Jwt.Secret), nil
+	})
+
+	if err != nil {
+		return err
+	}
+
+	claims := token.Claims.(jwt.MapClaims)
+	data := claims["email"].(string)
+
+	_, _, _, err2 := repository.GetUserByEmailOrName(data)
+	if err2 != nil {
+		return err
+	}
+
+	return nil
+}
+
 func Register(c fiber.Ctx) error {
 	user := new(models.User)
 	if err := c.Bind().Body(user); err != nil {
@@ -94,11 +115,12 @@ func Register(c fiber.Ctx) error {
 		})
 	}
 
-	randomtoken := utils.GenerateARandomString(10)
+	randomtoken := utils.GenerateARandomString(20)
+	err = utils.SendEmail("http://localhost:8080/auth/verify?token="+randomtoken, user.Email)
 	err = repository.SetUserToken(randomtoken, user.Email)
 
 	return c.JSON(fiber.Map{
-		"success": "Cookie set",
+		"success": "Check Mail",
 	})
 
 }
@@ -109,8 +131,8 @@ func VerifyToken(c fiber.Ctx) error {
 		return c.Status(400).JSON(fiber.Map{
 			"error": "Token not found",
 		})
-
 	}
+
 	_, err := repository.GetUserToken(token)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{

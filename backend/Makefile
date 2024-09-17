@@ -10,4 +10,4 @@ migrate-down:
 	cd $(MIGRATION_DIR) && goose postgres postgresql://root:root@localhost:5432/postgres down
 
 migration-new:
-	cd $(MIGRATION_DIR) && goose postgres create new_schema sql
+	cd $(MIGRATION_DIR) && goose create new_schema sql
