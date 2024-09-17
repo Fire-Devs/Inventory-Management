@@ -5,13 +5,13 @@
 
 ## TODO
 
-- [x] **Login/Register Email based Authentication**
-- [x] **Dashboard Admin/Other staff**
-- [x] **Implement RBAC**
-- [x] **Add Database for Item/Inventory/Seller**
-- [x] **QR Code labeling system for products**
-- [x] **Stock Management**
-- [x] **Notifications & Alerts**
+- [ ] **Login/Register Email based Authentication**
+- [ ] **Dashboard Admin/Other staff**
+- [ ] **Implement RBAC**
+- [ ] **Add Database for Item/Inventory/Seller**
+- [ ] **QR Code labeling system for products**
+- [ ] **Stock Management**
+- [ ] **Notifications & Alerts**
 
 ## Technologies Used
 
