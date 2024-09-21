@@ -14,11 +14,11 @@ func Connect() (*pgx.Conn, error) {
 	conn, err := pgx.Connect(
 		context.Background(),
 		fmt.Sprintf("postgres://%s:%s@%s:%d/%s",
-			conf.Database.DbUser,
-			conf.Database.DbPass,
-			conf.Database.Host,
-			conf.Database.Port,
-			conf.Database.DbName,
+			conf.Postgres.DbUser,
+			conf.Postgres.DbPass,
+			conf.Postgres.Host,
+			conf.Postgres.Port,
+			conf.Postgres.DbName,
 		),
 	)
 

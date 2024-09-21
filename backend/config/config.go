@@ -5,12 +5,19 @@ import (
 	"log"
 )
 
-type Database struct {
+type Postgres struct {
 	Host   string `toml:"host"`
 	Port   int64  `toml:"port"`
 	DbUser string `toml:"user"`
 	DbPass string `toml:"pass"`
 	DbName string `toml:"dbname"`
+}
+
+type Mongo struct {
+	Host   string `toml:"host"`
+	Port   int64  `toml:"port"`
+	DbUser string `toml:"user"`
+	DbPass string `toml:"pass"`
 }
 
 type Redis struct {
@@ -27,7 +34,8 @@ type Server struct {
 }
 
 type Config struct {
-	Database Database `toml:"database"`
+	Postgres Postgres `toml:"postgres"`
+	Mongo    Mongo    `toml:"mongo"`
 	Redis    Redis    `toml:"redis"`
 	Jwt      Jwt      `toml:"jwt"`
 	Server   Server   `toml:"server"`
