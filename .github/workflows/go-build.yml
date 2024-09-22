@@ -5,14 +5,14 @@ on:
     branches:
       - main
     tags:
-      - 'v*.*.*'  # Triggers the workflow when a new tag matching this pattern is pushed
+      - 'v*.*.*'
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Check out the code from the repository
+      # Step 1: Check out the repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
@@ -22,42 +22,38 @@ jobs:
         with:
           go-version: '1.20'
 
-      # Step 3: Cache Go modules
-      - name: Cache Go modules
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
-
-      # Step 4: Install dependencies
+      # Step 3: Install dependencies in ./backend
       - name: Install dependencies
+        working-directory: ./backend
         run: go mod tidy
 
-      # Step 5: Build the Go project
+      # Step 4: Build the Go project in ./backend
       - name: Build
-        run: go build -o my-app ./backend/main.go
+        working-directory: ./backend
+        run: go build -o my-app main.go
 
-      # Step 6: Upload binary as an artifact for release
+      # Step 5: (Optional) Run tests in ./backend
+      - name: Run tests
+        working-directory: ./backend
+        run: go test ./...
+
+      # Step 6: Upload the build artifact
       - name: Upload release binary
         uses: actions/upload-artifact@v3
         with:
           name: my-app-binary
-          path: ./my-app
+          path: ./backend/my-app
 
   release:
     needs: build
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')  # Only run this job if a tag is pushed
+    if: startsWith(github.ref, 'refs/tags/')
     steps:
-      # Step 1: Check out the code (again, since this is a separate job)
+      # Step 1: Check out the repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Step 2: Download the build artifact from the previous job
+      # Step 2: Download the build artifact
       - name: Download artifact
         uses: actions/download-artifact@v3
         with:
@@ -68,7 +64,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           artifacts: my-app-binary
-          tag: ${{ github.ref_name }}  # The pushed tag (e.g., v1.0.0)
+          tag: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           body: |
             Built with GitHub Actions.
