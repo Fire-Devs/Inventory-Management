@@ -14,9 +14,6 @@ func HandleRoutes(app *fiber.App) {
 	auth.Post("/register", handler.Register)
 	auth.Get("/verify", handler.VerifyToken)
 
-	app.Get("/user", GetUser, middleware.IsAuthorized)
-}
-
-func GetUser(c fiber.Ctx) error {
-	return c.SendString("Hello, World!")
+	app.Post("/categories", handler.CreateCategory, middleware.IsAuthorized)
+	app.Get("/categories", handler.FetchAllCategories, middleware.IsAuthorized)
 }

@@ -1,0 +1,76 @@
+name: Go Build and Release
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*.*.*'  # Triggers the workflow when a new tag matching this pattern is pushed
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the code from the repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Go environment
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
+
+      # Step 3: Cache Go modules
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      # Step 4: Install dependencies
+      - name: Install dependencies
+        run: go mod tidy
+
+      # Step 5: Build the Go project
+      - name: Build
+        run: go build -o my-app ./backend/main.go
+
+      # Step 6: Upload binary as an artifact for release
+      - name: Upload release binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: my-app-binary
+          path: ./my-app
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')  # Only run this job if a tag is pushed
+    steps:
+      # Step 1: Check out the code (again, since this is a separate job)
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Step 2: Download the build artifact from the previous job
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: my-app-binary
+
+      # Step 3: Create a GitHub release and upload the binary
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: my-app-binary
+          tag: ${{ github.ref_name }}  # The pushed tag (e.g., v1.0.0)
+          name: Release ${{ github.ref_name }}
+          body: |
+            Built with GitHub Actions.
+          draft: false
+          prerelease: false

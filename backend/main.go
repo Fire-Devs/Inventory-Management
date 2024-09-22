@@ -3,7 +3,6 @@ package main
 import (
 	"InventoryManagement/config"
 	"InventoryManagement/routes"
-	"fmt"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v3"
 	"log"
@@ -25,7 +24,6 @@ func main() {
 	})
 
 	conf := config.LoadConfig()
-	fmt.Println(conf)
 
 	routes.HandleRoutes(app)
 

@@ -1,22 +1,24 @@
 package models
 
+import "go.mongodb.org/mongo-driver/bson"
+
 type Inventory struct {
-	ID         int
-	Name       string `json:"name" validate:"required"`
-	Price      int    `json:"price" validate:"required"`
-	Stock      int    `json:"stock" validate:"required"`
-	CategoryID int    `json:"category_id" validate:"required"`
-	CoverImage string `json:"cover_image"`
-	SupplierID int    `json:"supplier_id"`
+	ID            int
+	Name          string        `json:"name" validate:"required"`
+	Price         int           `json:"price" validate:"required"`
+	Stock         int           `json:"stock" validate:"required"`
+	CategoryID    int           `json:"category_id" validate:"required"`
+	CoverImage    string        `json:"cover_image"`
+	SupplierID    int           `json:"supplier_id"`
+	InventoryData InventoryData `json:"inventory_data"`
 }
 
 type InventoryData struct {
 	ID          int
-	Description string                 `bson:"description" json:"description"`
-	MetaData    map[string]interface{} `bson:"meta_data" json:"meta_data"`
-	Images      []map[string]string    `bson:"images" json:"images"`
-	Size        []map[string]string    `bson:"size" json:"size"`
-	Colors      []string               `bson:"colors" json:"colors"`
+	Description string   `bson:"description" json:"description"`
+	MetaData    bson.M   `bson:"meta_data" json:"meta_data"`
+	Images      []string `bson:"images" json:"images"`
+	Features    []string `bson:"features" json:"features"`
 }
 
 type Category struct {
