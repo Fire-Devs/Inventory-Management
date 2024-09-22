@@ -42,6 +42,7 @@ func GetCategories() ([]models.Category, error) {
 
 	return categories, nil
 }
+
 func InsertSupplier(supplier *models.Supplier) error {
 	postgres, _ := database.Connect()
 
@@ -53,6 +54,28 @@ func InsertSupplier(supplier *models.Supplier) error {
 	}
 
 	return nil
+}
+
+func GetSuppliers() ([]models.Supplier, error) {
+	postgres, _ := database.Connect()
+
+	rows, err := postgres.Query(context.Background(), "SELECT * FROM suppliers")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var suppliers []models.Supplier
+	for rows.Next() {
+		var supplier models.Supplier
+		err := rows.Scan(&supplier.ID, &supplier.Name, &supplier.ContactInfo)
+		if err != nil {
+			return nil, err
+		}
+		suppliers = append(suppliers, supplier)
+	}
+
+	return suppliers, nil
 }
 
 func InsertInventory(inventory *models.Inventory) error {

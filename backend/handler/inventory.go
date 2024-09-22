@@ -36,6 +36,36 @@ func FetchAllCategories(c fiber.Ctx) error {
 	return c.Status(200).JSON(categories)
 }
 
+func CreateSupplier(c fiber.Ctx) error {
+	name, contactInfo := c.FormValue("name"), c.FormValue("contact_info")
+	if name == "" || contactInfo == "" {
+		return c.Status(400).JSON(fiber.Map{
+			"error": "Name or Contact Info is missing",
+		})
+	}
+	err := repository.InsertSupplier(
+		&models.Supplier{
+			Name:        name,
+			ContactInfo: contactInfo,
+		})
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	return c.Status(200).JSON(fiber.Map{"message": "Supplier created successfully"})
+}
+
+func FetchAllSuppliers(c fiber.Ctx) error {
+	suppliers, err := repository.GetSuppliers()
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	return c.Status(200).JSON(suppliers)
+}
+
 func CreateInventory(c fiber.Ctx) error {
 	inventory := new(models.Inventory)
 	if err := c.Bind().Body(inventory); err != nil {
