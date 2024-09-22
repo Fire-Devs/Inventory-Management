@@ -18,14 +18,14 @@ func init() {
 
 func Login(c fiber.Ctx) error {
 
-	user := new(models.User)
+	user := new(models.UserLogin)
 	if err := c.Bind().Body(user); err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
 
-	name, email, password, err := repository.GetUserByEmailOrName(user.Email)
+	name, email, password, err := repository.GetUserByEmailOrName(user)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"error": err.Error(),
@@ -79,7 +79,7 @@ func ParseJWT(cookie string) error {
 	claims := token.Claims.(jwt.MapClaims)
 	data := claims["email"].(string)
 
-	_, _, _, err2 := repository.GetUserByEmailOrName(data)
+	_, _, _, err2 := repository.GetUserByEmailOrName(&models.UserLogin{Email: data})
 	if err2 != nil {
 		return err
 	}
@@ -94,7 +94,8 @@ func Register(c fiber.Ctx) error {
 			"error": err.Error(),
 		})
 	}
-	name, email, _, _ := repository.GetUserByEmailOrName(user.Email)
+
+	name, email, _, _ := repository.GetUserByEmailOrName(&models.UserLogin{Email: user.Email})
 	if email != "" && name != "" {
 		return c.Status(400).JSON(fiber.Map{
 			"error": "User already exists",

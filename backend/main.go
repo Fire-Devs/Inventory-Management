@@ -5,6 +5,7 @@ import (
 	"InventoryManagement/routes"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/logger"
 	"log"
 )
 
@@ -22,6 +23,7 @@ func main() {
 		ServerHeader:    "Askar",
 		AppName:         "Inventory Management",
 	})
+	app.Use(logger.New())
 
 	conf := config.LoadConfig()
 

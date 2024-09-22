@@ -2,6 +2,7 @@ package repository
 
 import (
 	"InventoryManagement/database"
+	"InventoryManagement/models"
 	"context"
 	"time"
 )
@@ -21,10 +22,17 @@ func CreateUser(name string, email string, password string) error {
 	return nil
 }
 
-func GetUserByEmailOrName(data string) (string, string, string, error) {
+func GetUserByEmailOrName(user *models.UserLogin) (string, string, string, error) {
 	conn, err := database.Connect()
 	if err != nil {
 		panic(err)
+	}
+
+	var data string
+	if user.Email != "" {
+		data = user.Email
+	} else {
+		data = user.Name
 	}
 
 	var name, email, password string
