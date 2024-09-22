@@ -32,36 +32,43 @@ jobs:
       - name: Build
         working-directory: ./backend
         run: |
-          GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} go build -o my-app-${{ matrix.os }}-${{ matrix.arch }} main.go
+          # Build binary for the OS/Arch
+          GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} go build -o my-app-${{ matrix.os }}-${{ matrix.arch }}-binary main.go
 
       - name: Upload release binary
         uses: actions/upload-artifact@v3
         with:
           name: my-app-${{ matrix.os }}-${{ matrix.arch }}-binary
-          path: ./backend/my-app-${{ matrix.os }}-${{ matrix.arch }}
+          path: ./backend/my-app-${{ matrix.os }}-${{ matrix.arch }}-binary
 
   release:
     needs: build
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # Ensure write permission for creating releases
+      contents: write
     if: startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Download artifacts
+      - name: Download all artifacts
         uses: actions/download-artifact@v3
+
+      - name: Rename Windows Binaries (optional)
+        if: runner.os == 'windows'
+        run: |
+          mv my-app-windows-amd64-binary my-app-windows-amd64.exe
+          mv my-app-windows-arm64-binary my-app-windows-arm64.exe
 
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}  # Use the GitHub token
+          token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: |
-            my-app-linux-amd64
-            my-app-linux-arm64
-            my-app-darwin-amd64
-            my-app-darwin-arm64
+            my-app-linux-amd64-binary
+            my-app-linux-arm64-binary
+            my-app-darwin-amd64-binary
+            my-app-darwin-arm64-binary
             my-app-windows-amd64.exe
             my-app-windows-arm64.exe
           tag: ${{ github.ref_name }}
