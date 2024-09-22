@@ -5,7 +5,7 @@
 
 ## TODO
 
-- [ ] **Login/Register Email based Authentication**
+- [x] **Login/Register Email based Authentication**
 - [ ] **Dashboard Admin/Other staff**
 - [ ] **Implement RBAC**
 - [ ] **Add Database for Item/Inventory/Seller**

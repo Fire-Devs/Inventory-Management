@@ -7,6 +7,9 @@ on:
     tags:
       - 'v*.*.*'
 
+env:
+  ARTIFACT_NAME: inventory-app  # Define the artifact name here
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -36,14 +39,15 @@ jobs:
       - name: Build
         working-directory: ./backend
         run: |
-          GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} go build -o my-app-${{ matrix.os }}-${{ matrix.arch }} main.go
+          # Build binary for the OS/Arch combination, use the ARTIFACT_NAME variable
+          GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} go build -o ${{ env.ARTIFACT_NAME }}-${{ matrix.os }}-${{ matrix.arch }} main.go
 
       # Step 5: Upload the binaries as artifacts
       - name: Upload release binary
         uses: actions/upload-artifact@v3
         with:
-          name: my-app-${{ matrix.os }}-${{ matrix.arch }}
-          path: ./backend/my-app-${{ matrix.os }}-${{ matrix.arch }}
+          name: ${{ env.ARTIFACT_NAME }}-${{ matrix.os }}-${{ matrix.arch }}
+          path: ./backend/${{ env.ARTIFACT_NAME }}-${{ matrix.os }}-${{ matrix.arch }}
 
   release:
     needs: build
@@ -63,21 +67,21 @@ jobs:
       # Step 3: Rename Windows binaries to add .exe extension
       - name: Rename Windows Binaries
         run: |
-          mv my-app-windows-amd64/my-app-windows-amd64 my-app-windows-amd64/my-app-windows-amd64.exe
-          mv my-app-windows-arm64/my-app-windows-arm64 my-app-windows-arm64/my-app-windows-arm64.exe
+          mv ${{ env.ARTIFACT_NAME }}-windows-amd64/${{ env.ARTIFACT_NAME }}-windows-amd64 ${{ env.ARTIFACT_NAME }}-windows-amd64/${{ env.ARTIFACT_NAME }}-windows-amd64.exe
+          mv ${{ env.ARTIFACT_NAME }}-windows-arm64/${{ env.ARTIFACT_NAME }}-windows-arm64 ${{ env.ARTIFACT_NAME }}-windows-arm64/${{ env.ARTIFACT_NAME }}-windows-arm64.exe
 
-      # Step 4: Upload the binaries to the release (ensure you target the files)
+      # Step 4: Upload the binaries to the release (use variable for artifact name)
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: |
-            my-app-linux-amd64/my-app-linux-amd64
-            my-app-linux-arm64/my-app-linux-arm64
-            my-app-darwin-amd64/my-app-darwin-amd64
-            my-app-darwin-arm64/my-app-darwin-arm64
-            my-app-windows-amd64/my-app-windows-amd64.exe
-            my-app-windows-arm64/my-app-windows-arm64.exe
+            ${{ env.ARTIFACT_NAME }}-linux-amd64/${{ env.ARTIFACT_NAME }}-linux-amd64
+            ${{ env.ARTIFACT_NAME }}-linux-arm64/${{ env.ARTIFACT_NAME }}-linux-arm64
+            ${{ env.ARTIFACT_NAME }}-darwin-amd64/${{ env.ARTIFACT_NAME }}-darwin-amd64
+            ${{ env.ARTIFACT_NAME }}-darwin-arm64/${{ env.ARTIFACT_NAME }}-darwin-arm64
+            ${{ env.ARTIFACT_NAME }}-windows-amd64/${{ env.ARTIFACT_NAME }}-windows-amd64.exe
+            ${{ env.ARTIFACT_NAME }}-windows-arm64/${{ env.ARTIFACT_NAME }}-windows-arm64.exe
           tag: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           body: |
