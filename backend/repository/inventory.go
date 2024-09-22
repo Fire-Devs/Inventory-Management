@@ -4,6 +4,7 @@ import (
 	"InventoryManagement/database"
 	"InventoryManagement/models"
 	"context"
+	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -58,26 +59,56 @@ func InsertInventory(inventory *models.Inventory) error {
 	postgres, _ := database.Connect()
 	mongo, _ := database.ConnectMongo()
 
-	id, err := postgres.Exec(context.Background(),
-		"INSERT INTO inventory (name, stock, price, cover_image, category_id, supplier_id) VALUES ($1, $2) RETURNING id",
-		inventory.Name, inventory.Stock, inventory.Price, inventory.CoverImage, inventory.CategoryID, inventory.SupplierID)
+	var id int
+	err := postgres.QueryRow(context.Background(),
+		"INSERT INTO inventory (name, stock, price, cover_image, category_id, supplier_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
+		inventory.Name, inventory.Stock, inventory.Price, inventory.CoverImage, inventory.CategoryID, inventory.SupplierID).Scan(&id)
 	if err != nil {
 		return err
 	}
 
+	fmt.Println(id)
+
 	_, err = mongo.Database("inventory").Collection("inventory_data").InsertOne(context.Background(),
-		bson.M{
-			"inventory_id": id,
-			"description":  inventory.InventoryData.Description,
-			"meta_data":    inventory.InventoryData.MetaData,
-			"images":       inventory.InventoryData.Images,
-			"features":     inventory.InventoryData.Features,
+		bson.D{
+			{Key: "inventory_id", Value: id},
+			{Key: "description", Value: inventory.InventoryData.Description},
+			{Key: "meta_data", Value: inventory.InventoryData.MetaData},
+			{Key: "images", Value: inventory.InventoryData.Images},
+			{Key: "features", Value: inventory.InventoryData.Features},
 		})
 
 	if err != nil {
 		return err
 	}
-
 	return nil
+}
 
+func GetInventory() ([]models.Inventory, error) {
+	postgres, _ := database.Connect()
+
+	rows, err := postgres.Query(context.Background(), "SELECT id, name, stock, price, cover_image, category_id, supplier_id FROM inventory")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var inventories []models.Inventory
+	for rows.Next() {
+		var inventory models.Inventory
+		err := rows.Scan(&inventory.ID, &inventory.Name, &inventory.Stock, &inventory.Price, &inventory.CoverImage, &inventory.CategoryID, &inventory.SupplierID)
+		if err != nil {
+			return nil, err
+		}
+
+		mongo, _ := database.ConnectMongo()
+		err = mongo.Database("inventory").Collection("inventory_data").FindOne(context.Background(), bson.M{"inventory_id": inventory.ID}).Decode(&inventory.InventoryData)
+		if err != nil {
+			return nil, err
+		}
+
+		inventories = append(inventories, inventory)
+	}
+
+	return inventories, nil
 }

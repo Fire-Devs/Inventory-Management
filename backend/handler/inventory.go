@@ -35,3 +35,31 @@ func FetchAllCategories(c fiber.Ctx) error {
 	}
 	return c.Status(200).JSON(categories)
 }
+
+func CreateInventory(c fiber.Ctx) error {
+	inventory := new(models.Inventory)
+	if err := c.Bind().Body(inventory); err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	err := repository.InsertInventory(inventory)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	return c.Status(200).JSON(fiber.Map{"message": "Inventory created successfully"})
+}
+
+func FetchAllInventory(c fiber.Ctx) error {
+	inventory, err := repository.GetInventory()
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	return c.Status(200).JSON(inventory)
+}

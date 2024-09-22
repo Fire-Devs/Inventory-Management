@@ -15,5 +15,8 @@ func HandleRoutes(app *fiber.App) {
 	auth.Get("/verify", handler.VerifyToken)
 
 	app.Post("/categories", handler.CreateCategory, middleware.IsAuthorized)
-	app.Get("/categories", handler.FetchAllCategories, middleware.IsAuthorized)
+	app.Get("/categories", handler.FetchAllCategories)
+	app.Post("/inventory", handler.CreateInventory, middleware.IsAuthorized)
+	app.Get("/inventory", handler.FetchAllInventory)
+
 }
