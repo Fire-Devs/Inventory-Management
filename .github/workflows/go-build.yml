@@ -32,14 +32,14 @@ jobs:
       - name: Build
         working-directory: ./backend
         run: |
-          # Build binary for the OS/Arch
-          GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} go build -o my-app-${{ matrix.os }}-${{ matrix.arch }}-binary main.go
+          # Build binary for the OS/Arch combination
+          GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} go build -o my-app-${{ matrix.os }}-${{ matrix.arch }} main.go
 
       - name: Upload release binary
         uses: actions/upload-artifact@v3
         with:
-          name: my-app-${{ matrix.os }}-${{ matrix.arch }}-binary
-          path: ./backend/my-app-${{ matrix.os }}-${{ matrix.arch }}-binary
+          name: my-app-${{ matrix.os }}-${{ matrix.arch }}
+          path: ./backend/my-app-${{ matrix.os }}-${{ matrix.arch }} # Upload the actual binary file, not a directory
 
   release:
     needs: build
@@ -54,23 +54,24 @@ jobs:
       - name: Download all artifacts
         uses: actions/download-artifact@v3
 
-      - name: Rename Windows Binaries (optional)
+      # Rename Windows binaries to include .exe extension
+      - name: Rename Windows Binaries
         if: runner.os == 'windows'
         run: |
-          mv my-app-windows-amd64-binary my-app-windows-amd64.exe
-          mv my-app-windows-arm64-binary my-app-windows-arm64.exe
+          mv my-app-windows-amd64 my-app-windows-amd64.exe
+          mv my-app-windows-arm64 my-app-windows-arm64.exe
 
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: |
-            my-app-linux-amd64-binary
-            my-app-linux-arm64-binary
-            my-app-darwin-amd64-binary
-            my-app-darwin-arm64-binary
-            my-app-windows-amd64.exe
-            my-app-windows-arm64.exe
+            ./backend/my-app-linux-amd64
+            ./backend/my-app-linux-arm64
+            ./backend/my-app-darwin-amd64
+            ./backend/my-app-darwin-arm64
+            ./backend/my-app-windows-amd64.exe
+            ./backend/my-app-windows-arm64.exe
           tag: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           body: |
