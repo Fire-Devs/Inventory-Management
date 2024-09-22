@@ -66,12 +66,12 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: |
-            ./backend/my-app-linux-amd64
-            ./backend/my-app-linux-arm64
-            ./backend/my-app-darwin-amd64
-            ./backend/my-app-darwin-arm64
-            ./backend/my-app-windows-amd64.exe
-            ./backend/my-app-windows-arm64.exe
+              /home/runner/work/Inventory-Management/Inventory-Management/my-app-linux-amd64
+              /home/runner/work/Inventory-Management/Inventory-Management/my-app-linux-arm64
+              /home/runner/work/Inventory-Management/Inventory-Management/my-app-darwin-amd64
+              /home/runner/work/Inventory-Management/Inventory-Management/my-app-darwin-arm64
+              /home/runner/work/Inventory-Management/Inventory-Management/my-app-windows-amd64.exe
+              /home/runner/work/Inventory-Management/Inventory-Management/my-app-windows-arm64.exe
           tag: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           body: |
