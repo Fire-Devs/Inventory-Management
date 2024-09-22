@@ -17,29 +17,33 @@ jobs:
         arch: [amd64, arm64]
 
     steps:
+      # Step 1: Check out the repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # Step 2: Set up Go environment
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
           go-version: '1.23'
 
+      # Step 3: Install dependencies
       - name: Install dependencies
         working-directory: ./backend
         run: go mod tidy
 
+      # Step 4: Build the Go project for each OS/Arch combination
       - name: Build
         working-directory: ./backend
         run: |
-          # Build binary for the OS/Arch combination
           GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} go build -o my-app-${{ matrix.os }}-${{ matrix.arch }} main.go
 
+      # Step 5: Upload the binaries as artifacts
       - name: Upload release binary
         uses: actions/upload-artifact@v3
         with:
           name: my-app-${{ matrix.os }}-${{ matrix.arch }}
-          path: ./backend/my-app-${{ matrix.os }}-${{ matrix.arch }} # Upload the actual binary file, not a directory
+          path: ./backend/my-app-${{ matrix.os }}-${{ matrix.arch }}
 
   release:
     needs: build
@@ -48,30 +52,32 @@ jobs:
       contents: write
     if: startsWith(github.ref, 'refs/tags/')
     steps:
+      # Step 1: Check out the repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # Step 2: Download all artifacts
       - name: Download all artifacts
         uses: actions/download-artifact@v3
 
-      # Rename Windows binaries to include .exe extension
+      # Step 3: Rename Windows binaries to add .exe extension
       - name: Rename Windows Binaries
-        if: runner.os == 'windows'
         run: |
-          mv my-app-windows-amd64 my-app-windows-amd64.exe
-          mv my-app-windows-arm64 my-app-windows-arm64.exe
+          mv my-app-windows-amd64/my-app-windows-amd64 my-app-windows-amd64/my-app-windows-amd64.exe
+          mv my-app-windows-arm64/my-app-windows-arm64 my-app-windows-arm64/my-app-windows-arm64.exe
 
+      # Step 4: Upload the binaries to the release (ensure you target the files)
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: |
-              /home/runner/work/Inventory-Management/Inventory-Management/my-app-linux-amd64
-              /home/runner/work/Inventory-Management/Inventory-Management/my-app-linux-arm64
-              /home/runner/work/Inventory-Management/Inventory-Management/my-app-darwin-amd64
-              /home/runner/work/Inventory-Management/Inventory-Management/my-app-darwin-arm64
-              /home/runner/work/Inventory-Management/Inventory-Management/my-app-windows-amd64.exe
-              /home/runner/work/Inventory-Management/Inventory-Management/my-app-windows-arm64.exe
+            my-app-linux-amd64/my-app-linux-amd64
+            my-app-linux-arm64/my-app-linux-arm64
+            my-app-darwin-amd64/my-app-darwin-amd64
+            my-app-darwin-arm64/my-app-darwin-arm64
+            my-app-windows-amd64/my-app-windows-amd64.exe
+            my-app-windows-arm64/my-app-windows-arm64.exe
           tag: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           body: |
