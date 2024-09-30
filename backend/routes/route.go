@@ -14,6 +14,9 @@ func HandleRoutes(app *fiber.App) {
 	auth.Post("/register", handler.Register)
 	auth.Get("/verify", handler.VerifyToken)
 
+	// RBAC routes
+	app.Post("/addroles", handler.AddPermissionToRoles)
+
 	// Inventory addition routes
 	app.Post("/categories", handler.CreateCategory, middleware.IsAuthorized)
 	app.Post("/suppliers", handler.CreateSupplier, middleware.IsAuthorized)
