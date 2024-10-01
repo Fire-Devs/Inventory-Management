@@ -48,6 +48,12 @@ To set up this project locally, follow the steps below:
       cd backend
       ```
       ```bash
+      go install github.com/air-verse/air@latest
+      ```
+      ```bash
+      go install github.com/pressly/goose/v3/cmd/goose@latest
+      ```
+      ```bash
       go mod tidy
       ```
       ```bash

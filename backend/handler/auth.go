@@ -19,6 +19,7 @@ func init() {
 func Login(c fiber.Ctx) error {
 
 	user := new(models.UserLogin)
+
 	if err := c.Bind().Body(user); err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"error": err.Error(),

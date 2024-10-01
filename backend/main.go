@@ -32,6 +32,7 @@ func main() {
 		ServerHeader:    "Askar",
 		AppName:         "Inventory Management",
 	})
+
 	app.Use(logger.New())
 
 	conf := config.LoadConfig()

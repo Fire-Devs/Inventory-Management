@@ -2,11 +2,11 @@ package handler
 
 import (
 	"InventoryManagement/models"
+	"InventoryManagement/repository"
 	"github.com/gofiber/fiber/v3"
 )
 
-func AddPermissionToRoles(c fiber.Ctx) error {
-
+func InsertRoles(c fiber.Ctx) error {
 	role := new(models.Role)
 	if err := c.Bind().Body(role); err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -14,7 +14,51 @@ func AddPermissionToRoles(c fiber.Ctx) error {
 		})
 	}
 
+	err := repository.AddRoles(role)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
 	return c.Status(200).JSON(fiber.Map{
 		"data": role,
+	})
+}
+
+func FetchRoles(c fiber.Ctx) error {
+	roleName := c.Query("name")
+	roles, err := repository.FetchRoles(roleName)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	return c.Status(200).JSON(fiber.Map{
+		"roles": roles,
+	})
+}
+
+func UpdateRoles(c fiber.Ctx) error {
+	role := new(models.Role)
+	if err := c.Bind().Body(role); err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	err := repository.UpdateRoles(role)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	return c.Status(200).JSON(fiber.Map{
+		"data": role,
+	})
+}
+
+func FetchAllPermissions(c fiber.Ctx) error {
+	return c.Status(200).JSON(fiber.Map{
+		"permissions": models.Permissions,
 	})
 }
