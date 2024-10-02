@@ -1,51 +1,81 @@
 package config
 
 import (
-	"github.com/BurntSushi/toml"
+	"github.com/joho/godotenv"
 	"log"
+	"os"
+	"strconv"
 )
 
 type Postgres struct {
-	Host   string `toml:"host"`
-	Port   int64  `toml:"port"`
-	DbUser string `toml:"user"`
-	DbPass string `toml:"pass"`
-	DbName string `toml:"dbname"`
+	Host   string
+	Port   int64
+	DbUser string
+	DbPass string
+	DbName string
 }
 
 type Mongo struct {
-	Host   string `toml:"host"`
-	Port   int64  `toml:"port"`
-	DbUser string `toml:"user"`
-	DbPass string `toml:"pass"`
+	Host   string
+	Port   int64
+	DbUser string
+	DbPass string
 }
 
 type Redis struct {
-	Host string `toml:"host"`
-	Port int64  `toml:"port"`
+	Host string
+	Port int64
 }
 
 type Jwt struct {
-	Secret string `toml:"secret"`
+	Secret string
 }
 
 type Server struct {
-	Port string `toml:"port"`
+	Port string
 }
 
 type Config struct {
-	Postgres Postgres `toml:"postgres"`
-	Mongo    Mongo    `toml:"mongo"`
-	Redis    Redis    `toml:"redis"`
-	Jwt      Jwt      `toml:"jwt"`
-	Server   Server   `toml:"server"`
+	Postgres Postgres
+	Mongo    Mongo
+	Redis    Redis
+	Jwt      Jwt
+	Server   Server
 }
 
 func LoadConfig() Config {
-	var conf Config
-	_, err := toml.DecodeFile("config.toml", &conf)
+	err := godotenv.Load("../.env")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Error loading .env file")
 	}
-	return conf
+
+	postgresPort, _ := strconv.ParseInt(os.Getenv("POSTGRES_PORT"), 10, 64)
+	mongoPort, _ := strconv.ParseInt(os.Getenv("MONGO_PORT"), 10, 64)
+	redisPort, _ := strconv.ParseInt(os.Getenv("REDIS_PORT"), 10, 64)
+
+	return Config{
+		Postgres: Postgres{
+			Host:   os.Getenv("POSTGRES_HOST"),
+			Port:   postgresPort,
+			DbUser: os.Getenv("POSTGRES_USER"),
+			DbPass: os.Getenv("POSTGRES_PASS"),
+			DbName: os.Getenv("POSTGRES_DBNAME"),
+		},
+		Mongo: Mongo{
+			Host:   os.Getenv("MONGO_HOST"),
+			Port:   mongoPort,
+			DbUser: os.Getenv("MONGO_USER"),
+			DbPass: os.Getenv("MONGO_PASS"),
+		},
+		Redis: Redis{
+			Host: os.Getenv("REDIS_HOST"),
+			Port: redisPort,
+		},
+		Jwt: Jwt{
+			Secret: os.Getenv("JWT_SECRET"),
+		},
+		Server: Server{
+			Port: os.Getenv("SERVER_PORT"),
+		},
+	}
 }
