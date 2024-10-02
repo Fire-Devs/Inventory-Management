@@ -20,6 +20,8 @@ func HandleRoutes(app *fiber.App) {
 	app.Get("/roles", handler.FetchRoles)
 	app.Put("/roles", handler.UpdateRoles)
 
+	app.Get("/checkperm", handler.CheckPermission)
+
 	// Inventory addition routes
 	app.Post("/categories", handler.CreateCategory, middleware.IsAuthorized)
 	app.Post("/suppliers", handler.CreateSupplier, middleware.IsAuthorized)
