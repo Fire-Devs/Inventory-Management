@@ -68,7 +68,6 @@ func UpdateRoles(role *models.Role) error {
 	if err != nil {
 		return err
 	}
-
 	_, err = conn.Exec(context.Background(), "UPDATE roles SET name = $1, permissions = $2 WHERE id = $3", role.Name, role.Permissions, role.ID)
 	if err != nil {
 		return err

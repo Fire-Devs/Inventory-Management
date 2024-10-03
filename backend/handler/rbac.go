@@ -46,6 +46,12 @@ func UpdateRoles(c fiber.Ctx) error {
 		})
 	}
 
+	if role.ID == 0 {
+		return c.Status(400).JSON(fiber.Map{
+			"error": "Role ID is required",
+		})
+	}
+
 	err := repository.UpdateRoles(role)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{

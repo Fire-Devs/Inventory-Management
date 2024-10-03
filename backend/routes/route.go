@@ -15,7 +15,8 @@ func HandleRoutes(app *fiber.App) {
 	auth.Get("/verify", handler.VerifyToken)
 
 	// RBAC routes
-	app.Get("/permissions", handler.FetchAllPermissions)
+	app.Get("/permissions", handler.FetchAllPermissions, middleware.CheckPermission("read:role"))
+
 	app.Post("/roles", handler.InsertRoles)
 	app.Get("/roles", handler.FetchRoles)
 	app.Put("/roles", handler.UpdateRoles)
