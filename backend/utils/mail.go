@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"InventoryManagement/config"
 	"context"
 	"fmt"
 	"github.com/resend/resend-go/v2"
@@ -8,7 +9,9 @@ import (
 
 func SendEmail(url string, email string) error {
 	ctx := context.TODO()
-	client := resend.NewClient("re_JqPCDAa5_EDUUrzEYHo1tSBR3uJtuQjS9")
+	conf := config.LoadConfig()
+
+	client := resend.NewClient(conf.Mail.ApiKey)
 
 	params := &resend.SendEmailRequest{
 		From:    "noreply<onboarding@resend.dev>",

@@ -84,33 +84,10 @@ func FetchPermissionfromUser(user string) ([]string, error) {
 	}
 
 	var permissions []string
-	err = conn.QueryRow(context.Background(), "SELECT  FROM users u JOIN roles r O", roleName).Scan(&permissions)
+	err = conn.QueryRow(context.Background(), "SELECT r.permissions FROM users u JOIN roles r ON u.role = r.id WHERE u.email = $1", user).Scan(&permissions)
 	if err != nil {
 		return nil, err
 	}
 
 	return permissions, nil
 }
-
-/*
-func FetchPermissionfromUser(username string) ([]string, error) {
-	conn, err := database.Connect()
-	if err != nil {
-		return nil, err
-	}
-
-	var permissions []string
-	query := `
-		SELECT r.permissions
-		FROM users u
-		JOIN roles r ON u.role_id = r.id
-		WHERE u.username = $1
-	`
-	err = conn.QueryRow(context.Background(), query, username).Scan(&permissions)
-	if err != nil {
-		return nil, err
-	}
-
-	return permissions, nil
-}
-*/

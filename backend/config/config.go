@@ -35,12 +35,17 @@ type Server struct {
 	Port string
 }
 
+type Mail struct {
+	ApiKey string
+}
+
 type Config struct {
 	Postgres Postgres
 	Mongo    Mongo
 	Redis    Redis
 	Jwt      Jwt
 	Server   Server
+	Mail     Mail
 }
 
 func LoadConfig() Config {
@@ -54,6 +59,9 @@ func LoadConfig() Config {
 	redisPort, _ := strconv.ParseInt(os.Getenv("REDIS_PORT"), 10, 64)
 
 	return Config{
+		Mail: Mail{
+			ApiKey: os.Getenv("MAIL_API_KEY"),
+		},
 		Postgres: Postgres{
 			Host:   os.Getenv("POSTGRES_HOST"),
 			Port:   postgresPort,
