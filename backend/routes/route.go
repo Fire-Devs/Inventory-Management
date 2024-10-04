@@ -16,19 +16,20 @@ func HandleRoutes(app *fiber.App) {
 
 	// RBAC routes
 	app.Get("/permissions", handler.FetchAllPermissions, middleware.CheckPermission("read:role"))
+	app.Put("/roleuser", handler.UpdateRoleToUser, middleware.CheckPermission("update:role"))
 
-	app.Post("/roles", handler.InsertRoles)
-	app.Get("/roles", handler.FetchRoles)
-	app.Put("/roles", handler.UpdateRoles)
+	app.Post("/roles", handler.InsertRoles, middleware.CheckPermission("create:role"))
+	app.Get("/roles", handler.FetchRoles, middleware.CheckPermission("read:role"))
+	app.Put("/roles", handler.UpdateRoles, middleware.CheckPermission("update:role"))
 
 	// Inventory addition routes
-	app.Post("/categories", handler.CreateCategory, middleware.IsAuthorized)
-	app.Post("/suppliers", handler.CreateSupplier, middleware.IsAuthorized)
-	app.Post("/inventory", handler.CreateInventory, middleware.IsAuthorized)
+	app.Post("/categories", handler.CreateCategory, middleware.CheckPermission("create:category"))
+	app.Post("/suppliers", handler.CreateSupplier, middleware.CheckPermission("create:supplier"))
+	app.Post("/inventory", handler.CreateInventory, middleware.CheckPermission("create:inventory"))
 
 	// Inventory fetch routes
-	app.Get("/categories", handler.FetchAllCategories)
-	app.Get("/suppliers", handler.FetchAllSuppliers)
-	app.Get("/inventory", handler.FetchAllInventory)
+	app.Get("/categories", handler.FetchAllCategories, middleware.CheckPermission("read:category"))
+	app.Get("/suppliers", handler.FetchAllSuppliers, middleware.CheckPermission("read:supplier"))
+	app.Get("/inventory", handler.FetchAllInventory, middleware.CheckPermission("read:inventory"))
 
 }
