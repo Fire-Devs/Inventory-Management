@@ -6,6 +6,25 @@ import (
 	"github.com/gofiber/fiber/v3"
 )
 
+func UpdateRoleToUser(c fiber.Ctx) error {
+	role := new(models.RoleUser)
+	if err := c.Bind().Body(role); err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	err := repository.AssignRoleToUser(role.Email, role.RoleID)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	return c.Status(200).JSON(fiber.Map{
+		"message": "Role assigned to user successfully",
+	})
+}
+
 func InsertRoles(c fiber.Ctx) error {
 	role := new(models.Role)
 	if err := c.Bind().Body(role); err != nil {

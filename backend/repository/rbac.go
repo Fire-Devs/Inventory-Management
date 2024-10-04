@@ -24,6 +24,20 @@ func AddRoles(role *models.Role) error {
 	return nil
 }
 
+func AssignRoleToUser(email string, id string) error {
+	conn, err := database.Connect()
+	if err != nil {
+		return err
+	}
+
+	_, err = conn.Exec(context.Background(), "UPDATE users SET role = (SELECT id FROM roles WHERE id = $1) WHERE email = $2", id, email)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func FetchRoles(name string) ([]models.Role, error) {
 	conn, err := database.Connect()
 	if err != nil {

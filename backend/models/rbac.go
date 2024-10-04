@@ -25,6 +25,11 @@ var Permissions = []string{
 	"delete:role",
 }
 
+type RoleUser struct {
+	Email  string `json:"email" validate:"required,email"`
+	RoleID string `json:"role_id" validate:"required"`
+}
+
 type Role struct {
 	ID          int
 	Name        string   `json:"name" validate:"required"`
