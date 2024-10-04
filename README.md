@@ -7,9 +7,9 @@
 
 - [x] **Login/Register Email based Authentication**
 - [ ] **Dashboard Admin/Other staff**
-- [ ] **Implement RBAC**
+- [x] **Implement RBAC**
 - [x] **Add Database for Item/Inventory/Seller**
-- [ ] **QR Code labeling system for products**
+- [ ] **Bar Code labeling system for products**
 - [ ] **Stock Management**
 - [ ] **Notifications & Alerts**
 
