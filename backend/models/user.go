@@ -9,7 +9,7 @@ type User struct {
 
 type UserLogin struct {
 	ID       int
-	Email    string `json:"email"`
-	Name     string `json:"name"`
+	Email    string `json:"email" validate:"required_without=Name"`
+	Name     string `json:"name" validate:"required_without=Email"`
 	Password string `json:"password" validate:"required"`
 }
