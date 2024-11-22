@@ -28,8 +28,8 @@ func HandleRoutes(app *fiber.App) {
 	app.Post("/inventory", handler.CreateInventory, middleware.CheckPermission("create:inventory"))
 
 	// Inventory fetch routes
-	app.Get("/categories", handler.FetchAllCategories, middleware.CheckPermission("read:category"))
-	app.Get("/suppliers", handler.FetchAllSuppliers, middleware.CheckPermission("read:supplier"))
-	app.Get("/inventory", handler.FetchAllInventory, middleware.CheckPermission("read:inventory"))
+	app.Get("/categories", handler.FetchAllCategories)
+	app.Get("/suppliers", handler.FetchAllSuppliers)
+	app.Get("/inventory", handler.FetchAllInventory)
 
 }

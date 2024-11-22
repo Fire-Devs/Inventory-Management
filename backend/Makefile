@@ -4,10 +4,10 @@ go:
 MIGRATION_DIR=migration
 .PHONY: migrate-up
 migrate-up:
-	cd $(MIGRATION_DIR) && goose postgres postgresql://root:root@localhost:5432/postgres up
+	migrate -path $(MIGRATION_DIR) -database postgresql://root:root@localhost:5432/postgres up
 
 migrate-down:
-	cd $(MIGRATION_DIR) && goose postgres postgresql://root:root@localhost:5432/postgres down
+	migrate -path $(MIGRATION_DIR) -database postgresql://root:root@localhost:5432/postgres down
 
 migration-new:
-	cd $(MIGRATION_DIR) && goose create new_schema sql
+	migrate create -ext sql -dir $(MIGRATION_DIR) -seq create_table
