@@ -93,3 +93,20 @@ func FetchAllInventory(c fiber.Ctx) error {
 	}
 	return c.Status(200).JSON(inventory)
 }
+
+func CreatePrice(c fiber.Ctx) error {
+	price := new(models.Prices)
+	if err := c.Bind().Body(price); err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	id, err := repository.InsertPrice(price)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	return c.Status(200).JSON(fiber.Map{"message": "Price created successfully", "id": id})
+}

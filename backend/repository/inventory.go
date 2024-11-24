@@ -5,7 +5,6 @@ import (
 	"InventoryManagement/models"
 	"context"
 	"fmt"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 func InsertCategory(category *models.Category) error {
@@ -80,37 +79,60 @@ func GetSuppliers() ([]models.Supplier, error) {
 
 func InsertInventory(inventory *models.Inventory) error {
 	postgres, _ := database.Connect()
-	mongo, _ := database.ConnectMongo()
 
 	var id int
 	err := postgres.QueryRow(context.Background(),
-		"INSERT INTO inventory (name, stock, price, cover_image, category_id, supplier_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
-		inventory.Name, inventory.Stock, inventory.Price, inventory.CoverImage, inventory.CategoryID, inventory.SupplierID).Scan(&id)
+		"INSERT INTO inventory (name, stock, cover_image) VALUES ($1, $2, $3) RETURNING id",
+		inventory.Name, inventory.Stock, inventory.CoverImage).Scan(&id)
 	if err != nil {
+
 		return err
 	}
 
-	fmt.Println(id)
-
-	_, err = mongo.Database("inventory").Collection("inventory_data").InsertOne(context.Background(),
-		bson.D{
-			{Key: "inventory_id", Value: id},
-			{Key: "description", Value: inventory.InventoryData.Description},
-			{Key: "meta_data", Value: inventory.InventoryData.MetaData},
-			{Key: "images", Value: inventory.InventoryData.Images},
-			{Key: "features", Value: inventory.InventoryData.Features},
-		})
-
-	if err != nil {
-		return err
+	if len(inventory.Prices) != 0 {
+		for _, price := range inventory.Prices {
+			_, err = postgres.Exec(context.Background(),
+				"INSERT INTO price (currency, amount, inventory) VALUES ($1, $2, $3)",
+				price.Currency, price.Amount, id)
+			if err != nil {
+				fmt.Println("Price Error")
+				return err
+			}
+		}
 	}
+
+	if len(inventory.Category) != 0 {
+		for _, category := range inventory.Category {
+			_, err = postgres.Exec(context.Background(),
+				"INSERT INTO categories (name, description, inventory) VALUES ($1, $2, $3)",
+				category.Name, category.Description, id)
+			if err != nil {
+				fmt.Println("Category Error")
+				return err
+			}
+		}
+	}
+
+	if len(inventory.Supplier) != 0 {
+		for _, supplier := range inventory.Supplier {
+			_, err = postgres.Exec(context.Background(),
+				"INSERT INTO suppliers (name, contact_info, inventory) VALUES ($1, $2, $3)",
+				supplier.Name, supplier.ContactInfo, id)
+			if err != nil {
+				fmt.Println("Supplier Error")
+				return err
+			}
+		}
+	}
+
 	return nil
 }
 
 func GetInventory() ([]models.Inventory, error) {
 	postgres, _ := database.Connect()
 
-	rows, err := postgres.Query(context.Background(), "SELECT id, name, stock, price, cover_image, category_id, supplier_id FROM inventory")
+	// Querying the inventory table and also return the array of prices, categories and suppliers for each inventory
+	rows, err := postgres.Query(context.Background(), "SELECT id, name, stock, cover_image FROM inventory")
 	if err != nil {
 		return nil, err
 	}
@@ -119,19 +141,84 @@ func GetInventory() ([]models.Inventory, error) {
 	var inventories []models.Inventory
 	for rows.Next() {
 		var inventory models.Inventory
-		err := rows.Scan(&inventory.ID, &inventory.Name, &inventory.Stock, &inventory.Price, &inventory.CoverImage, &inventory.CategoryID, &inventory.SupplierID)
+		err := rows.Scan(&inventory.ID, &inventory.Name, &inventory.Stock, &inventory.CoverImage)
 		if err != nil {
+			fmt.Println("Inventory Error" + err.Error())
 			return nil, err
-		}
 
-		mongo, _ := database.ConnectMongo()
-		err = mongo.Database("inventory").Collection("inventory_data").FindOne(context.Background(), bson.M{"inventory_id": inventory.ID}).Decode(&inventory.InventoryData)
-		if err != nil {
-			return nil, err
 		}
-
 		inventories = append(inventories, inventory)
 	}
 
+	for i, inventory := range inventories {
+
+		rows, err := postgres.Query(context.Background(), "SELECT id, currency, amount, inventory FROM price WHERE inventory = $1", inventory.ID)
+		if err != nil {
+			return nil, err
+
+		}
+
+		var prices []models.Prices
+		for rows.Next() {
+			var price models.Prices
+			err := rows.Scan(&price.ID, &price.Currency, &price.Amount, &price.InventoryID)
+			if err != nil {
+				fmt.Println("Price Error")
+				return nil, err
+			}
+			prices = append(prices, price)
+		}
+		inventories[i].Prices = prices
+
+		rows, err = postgres.Query(context.Background(), "SELECT id, name, description, inventory FROM categories WHERE inventory = $1", inventory.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		var categories []models.Category
+		for rows.Next() {
+			var category models.Category
+			err := rows.Scan(&category.ID, &category.Name, &category.Description, &category.InventoryID)
+			if err != nil {
+				fmt.Println("Category Error")
+				return nil, err
+			}
+			categories = append(categories, category)
+		}
+		inventories[i].Category = categories
+
+		rows, err = postgres.Query(context.Background(), "SELECT id, name, contact_info, inventory FROM suppliers WHERE inventory = $1", inventory.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		var suppliers []models.Supplier
+		for rows.Next() {
+			var supplier models.Supplier
+			err := rows.Scan(&supplier.ID, &supplier.Name, &supplier.ContactInfo, &supplier.InventoryID)
+			if err != nil {
+				fmt.Println("Supplier Error")
+				return nil, err
+			}
+			suppliers = append(suppliers, supplier)
+		}
+		inventories[i].Supplier = suppliers
+
+	}
+
+	defer rows.Close()
+
 	return inventories, nil
+
+}
+
+func InsertPrice(prices *models.Prices) (id string, err error) {
+	postgres, _ := database.Connect()
+	err = postgres.QueryRow(context.Background(),
+		"INSERT INTO price (currency, amount, inventory) VALUES ($1, $2, $3) returning id",
+		prices.Currency, prices.Amount).Scan()
+	if err != nil {
+		return "", err
+	}
+	return id, nil
 }

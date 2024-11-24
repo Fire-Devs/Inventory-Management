@@ -2,7 +2,6 @@ package main
 
 import (
 	"InventoryManagement/config"
-	"InventoryManagement/models"
 	"InventoryManagement/routes"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v3"
@@ -21,11 +20,6 @@ func (v *structValidator) Validate(out any) error {
 
 func main() {
 	validate := validator.New()
-	// custom validator for permissions
-	err := validate.RegisterValidation("validPermissions", models.ValidPermissions)
-	if err != nil {
-		return
-	}
 
 	app := fiber.New(fiber.Config{
 		StructValidator: &structValidator{validate: validate},
