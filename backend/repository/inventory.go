@@ -131,7 +131,6 @@ func InsertInventory(inventory *models.Inventory) error {
 func GetInventory() ([]models.Inventory, error) {
 	postgres, _ := database.Connect()
 
-	// Querying the inventory table and also return the array of prices, categories and suppliers for each inventory
 	rows, err := postgres.Query(context.Background(), "SELECT id, name, stock, cover_image FROM inventory")
 	if err != nil {
 		return nil, err
